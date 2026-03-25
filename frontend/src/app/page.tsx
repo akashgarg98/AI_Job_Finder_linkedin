@@ -4,12 +4,7 @@ import axios from 'axios';
 import Navbar from '@/components/Navbar';
 import JobCard from '@/components/JobCard';
 import { Search, Loader2, UploadCloud, FileText } from 'lucide-react';
-import * as pdfjsLib from 'pdfjs-dist';
-
-if (typeof window !== 'undefined') {
-  // Completely bypass ALL external CDNs and CORS policies by serving the identical worker natively from the Next.js /public directory!
-  pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
-}
+// pdfjs-dist is imported dynamically inside handlers to prevent Next.js SSR build crashes
 
 export default function Home() {
   const [jobTitle, setJobTitle] = useState('');
@@ -32,6 +27,8 @@ export default function Home() {
       if (resume) {
         try {
           const arrayBuffer = await resume.arrayBuffer();
+          const pdfjsLib = await import('pdfjs-dist');
+          pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
           const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
           for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
