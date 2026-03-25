@@ -17,7 +17,7 @@ export default function Home() {
   const [apifyKey, setApifyKey] = useState('');
   const [yoe, setYoe] = useState('');
   const [resume, setResume] = useState<File | null>(null);
-  
+
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -25,7 +25,7 @@ export default function Home() {
     e.preventDefault();
     if (!jobTitle || !location || !apifyKey) return alert('Please fill in all search fields.');
     if (!resume) return alert('Please upload a PDF Resume before searching so we can analyze your fit!');
-    
+
     setLoading(true);
     try {
       let extractedResumeText = "";
@@ -34,15 +34,15 @@ export default function Home() {
           const arrayBuffer = await resume.arrayBuffer();
           const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
           for (let i = 1; i <= pdf.numPages; i++) {
-              const page = await pdf.getPage(i);
-              const content = await page.getTextContent();
-              const strings = content.items.map((item: any) => item.str);
-              extractedResumeText += strings.join(" ") + " ";
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            const strings = content.items.map((item: any) => item.str);
+            extractedResumeText += strings.join(" ") + " ";
           }
-        } catch(pdfErr: any) {
-            console.error("Local PDF Parsing Error:", pdfErr);
-            setLoading(false);
-            return alert(`PDF Parser Engine Error: ${pdfErr?.message || 'Worker conflict. Check Browser Console.'}`);
+        } catch (pdfErr: any) {
+          console.error("Local PDF Parsing Error:", pdfErr);
+          setLoading(false);
+          return alert(`PDF Parser Engine Error: ${pdfErr?.message || 'Worker conflict. Check Browser Console.'}`);
         }
       }
 
@@ -52,14 +52,14 @@ export default function Home() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          jobTitle, 
-          location, 
-          apifyKey, 
+          jobTitle,
+          location,
+          apifyKey,
           yoe,
           resumeText: extractedResumeText
         })
       });
-      
+
       const data = await res.json();
       if (data.success) {
         setJobs(data.jobs);
@@ -76,7 +76,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-black text-white selection:bg-blue-500/30 font-sans">
       <Navbar />
-      
+
       <div className="max-w-5xl mx-auto px-6 py-12">
         <div className="text-center mb-12 space-y-4">
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-500">
@@ -125,22 +125,22 @@ export default function Home() {
                     </>
                   )}
                 </div>
-                <input 
-                  id="resume-upload" 
-                  type="file" 
-                  accept="application/pdf" 
-                  className="hidden" 
+                <input
+                  id="resume-upload"
+                  type="file"
+                  accept="application/pdf"
+                  className="hidden"
                   onChange={e => {
                     const file = e.target.files?.[0];
                     if (file) setResume(file);
-                  }} 
+                  }}
                 />
               </label>
             </div>
           </div>
 
           <button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl flex justify-center items-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed">
-            {loading ? <Loader2 className="animate-spin w-5 h-5"/> : <Search className="w-5 h-5"/>}
+            {loading ? <Loader2 className="animate-spin w-5 h-5" /> : <Search className="w-5 h-5" />}
             {loading ? 'Loading...' : 'Find Jobs'}
           </button>
         </form>
