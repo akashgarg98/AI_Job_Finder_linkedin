@@ -46,7 +46,7 @@ export default function Home() {
         }
       }
 
-      const res = await fetch('http://localhost:5000/api/jobs/scrape', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/jobs/scrape`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
