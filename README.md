@@ -8,6 +8,21 @@ A full-stack job finder application that utilizes AI to analyze resumes against 
 ![Resume Upload](./screenshots/resume_upload.png)
 ![Job Results](./screenshots/job_results.png)
 
+## Tech Stack
+
+| Category | Technology | Description |
+| :--- | :--- | :--- |
+| **Frontend Framework** | **Next.js 15 (App Router)** | Modern React framework for routing and UI composition. |
+| **UI Library** | **React 19** | Component-based library for dynamic user interfaces. |
+| **Styling** | **Tailwind CSS** | Utility-first CSS framework for custom styling. |
+| **Language** | **TypeScript** | Type-safe JavaScript for robust application code. |
+| **AI Engine** | **Google Gemini AI** | Advanced LLM for resume scoring and feedback. |
+| **Icons** | **Lucide React** | Scalable icon library for professional UI designs. |
+| **PDF Processing** | **pdfjs-dist / pdf-parse** | Libraries for extracting content from PDF resumes. |
+| **Backend API** | **Node.js (Express)** | Fast API server for job logic and AI orchestration. |
+| **Communication** | **Axios / Fetch** | Handles frontend and backend data exchange. |
+| **Hosting** | **Vercel / Render** | Cloud platforms for hosting the web interface and API. |
+
 ## Project Structure
 
 This project consists of two main parts:
