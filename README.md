@@ -2,6 +2,12 @@
 
 A full-stack job finder application that utilizes AI to analyze resumes against job descriptions, providing a match score, feedback, and missing qualifications (experience matching).
 
+## Preview
+
+![Search Form](./screenshots/search_form.png)
+![Resume Upload](./screenshots/resume_upload.png)
+![Job Results](./screenshots/job_results.png)
+
 ## Project Structure
 
 This project consists of two main parts:
