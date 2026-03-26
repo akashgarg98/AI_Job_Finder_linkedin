@@ -1,0 +1,12 @@
+# Local Documentation
+interview_doc.md
+log_for_interview.md
+prompt_doc.md
+
+# Node modules
+node_modules/
+.env
+.next/
+dist/
+build/
+*.log
