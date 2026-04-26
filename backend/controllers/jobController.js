@@ -1,48 +1,54 @@
 const axios = require('axios');
 const { GoogleGenAI } = require('@google/genai');
 
-// Initialize Gemini. It automatically picks up GEMINI_API_KEY from process.env
-const ai = new GoogleGenAI({});
+// Initialize Gemini using the correct SDK pattern for @google/genai
+const ai = new GoogleGenAI({ 
+    apiKey: process.env.GEMINI_API_KEY,
+    apiVersion: 'v1beta' 
+});
 
 async function scoreWithGemini(resumeText, jobDescription, yoe) {
-    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
-       console.log("No Gemini API Key found in .env! Generating a random score for UI testing.");
-       return { score: Math.floor(Math.random() * 40) + 40, reasoning: "No API Key found. This is a system-generated placeholder explanation simulating the AI." }; 
-    }
-    const prompt = `You are a brutally honest, highly-critical senior technical recruiter. Your job is to strictly filter out candidates who do not meet the precise role requirements.
-    
-CRITICAL SCORING CRITERIA:
-1. The candidate explicitly states they have exactly **${yoe || "an unspecified number of"} Years of Experience (YoE)**. This number (${yoe}) is the ABSOLUTE TRUE YOE for scoring. Do NOT calculate or infer YOE from the dates on the resume. 
-2. If the timeline on the resume appears to contradict the stated ${yoe} YOE, you MUST still use ${yoe} for all scoring math, but you should mention in your reasoning that their resume implies a different timeline.
-3. You MUST scan the Job Description to find the strictly required "Years of Experience".
-4. **AUTOMATIC REJECTION**: If the Job Description requires MORE years of experience than their absolute true YOE (${yoe}), you MUST brutally fail the candidate. The score MUST be below 50. 
-5. A score of >= 80 (Green) can ONLY be given if the candidate perfectly meets or EXCEEDS the required Years of Experience AND has a phenomenal technical stack match.
-
-Return exactly a raw JSON object with two keys: "score" (integer 0-100) and "reasoning" (a succinct 2-sentence harsh explanation).
-If the score is < 80, the reasoning must explicitly state exactly what is missing from their resume or tear down the mismatch (e.g., "Role requires 6 years of experience, but your true YOE is only ${yoe}. You also lack cloud architecture.").
-Return ONLY valid JSON. Do not use markdown blocks.
-
-Resume:
-${resumeText.substring(0, 3500)}
-
-Job Description:
-${jobDescription}`;
-
     try {
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
+        if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_api_key_here' || process.env.GEMINI_API_KEY.includes('your_api')) {
+           return { score: 0, reasoning: "Missing API Key. Please add your GEMINI_API_KEY to the backend/.env file." }; 
+        }
+
+        const prompt = `You are a technical recruiter. Score this resume against the job description.
+        
+CRITICAL: Candidate has ${yoe || "0"} years of experience. If the job requires more, score must be below 50.
+
+Return ONLY a JSON object: {"score": number, "reasoning": "string"}
+
+Resume: ${resumeText.substring(0, 3000)}
+Job: ${jobDescription}`;
+
+        const result = await ai.models.generateContent({
+            model: 'gemini-flash-latest',
+            contents: prompt
         });
-        const rawText = response.text.replace(/```json/g, '').replace(/```/g, '').trim();
-        const parsed = JSON.parse(rawText);
+
+        const rawText = result.text ? result.text.trim() : "";
+        if (!rawText) {
+            return { score: 50, reasoning: "AI returned an empty response." };
+        }
+        
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        let parsed;
+        try {
+            parsed = JSON.parse(jsonMatch ? jsonMatch[0] : rawText);
+        } catch (err) {
+            console.error("JSON Parse Error:", err, "Raw Text:", rawText);
+            return { score: 50, reasoning: "AI response was not in valid JSON format." };
+        }
         
         return {
             score: Math.min(100, Math.max(0, parseInt(parsed.score || 50))),
-            reasoning: parsed.reasoning || "Failed to generate reasoning."
+            reasoning: parsed.reasoning || "AI analyzed your fit."
         };
     } catch(e) {
-        console.error('Gemini generative parsing error:', e.message);
-        return { score: 50, reasoning: "AI encountered an output formatting error." }; 
+        console.error('--- GEMINI ERROR ---');
+        console.error(e);
+        return { score: 50, reasoning: "AI scoring paused. Check terminal for error logs." }; 
     }
 }
 

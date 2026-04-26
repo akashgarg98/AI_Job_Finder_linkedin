@@ -5,8 +5,10 @@ prompt_doc.md
 
 # Node modules
 node_modules/
-.env
+.env*
 .next/
 dist/
 build/
 *.log
+.DS_Store
+.vscode/
